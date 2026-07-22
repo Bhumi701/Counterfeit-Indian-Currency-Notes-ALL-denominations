@@ -75,23 +75,32 @@ if uploaded_file is not None:
                 else:
                     result = analyze_note(image_path, denomination, tilt_path, backlit_path)
 
-                verdict = result["verdict"]
-                if verdict == "GENUINE":
-                    st.success(f"**Verdict: {verdict}**")
-                elif "SUSPECT" in verdict:
-                    st.warning(f"**Verdict: {verdict}**")
+                # Handle error responses from the analysis pipeline
+                if not isinstance(result, dict):
+                    st.error("Analysis failed: unexpected result type")
+                elif "error" in result:
+                    st.error(f"Analysis error: {result['error']}")
                 else:
-                    st.error(f"**Verdict: {verdict}**")
+                    verdict = result.get("verdict")
+                    if not verdict:
+                        st.error("Analysis produced no `verdict` — check server logs")
+                    else:
+                        if verdict == "GENUINE":
+                            st.success(f"**Verdict: {verdict}**")
+                        elif "SUSPECT" in verdict:
+                            st.warning(f"**Verdict: {verdict}**")
+                        else:
+                            st.error(f"**Verdict: {verdict}**")
 
-                st.metric("Confidence score", result["final_score"])
+                        st.metric("Confidence score", result.get("final_score", "N/A"))
 
-                st.subheader("Why this verdict")
-                for reason in result["reasons"]:
-                    st.write(f"- {reason}")
+                        st.subheader("Why this verdict")
+                        for reason in result.get("reasons", []):
+                            st.write(f"- {reason}")
 
-                with st.expander("Agent-by-agent scores"):
-                    st.json(result["agent_scores"])
-                    st.caption(f"Weights used: {result['weights_used']}")
+                        with st.expander("Agent-by-agent scores"):
+                            st.json(result.get("agent_scores", {}))
+                            st.caption(f"Weights used: {result.get('weights_used', {})}")
 
             except Exception as e:
                 st.error(f"Something went wrong: {e}")
