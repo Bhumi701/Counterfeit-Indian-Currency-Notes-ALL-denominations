@@ -14,11 +14,13 @@ for a demo.
 
 import streamlit as st
 import numpy as np
-import cv2
 import tempfile
 import os
 
-from main import analyze_note
+# Delay heavy imports (cv2, main) until runtime so the app can start
+# even if the deployment environment lacks OpenCV. When a user clicks
+# "Analyze Note" we attempt to import the pipeline and show a helpful
+# error if the import fails (e.g. no `cv2` on the platform).
 
 st.set_page_config(page_title="Counterfeit Note Detector", page_icon="\U0001F4B5", layout="centered")
 
@@ -53,7 +55,25 @@ if uploaded_file is not None:
     if st.button("Analyze Note", type="primary"):
         with st.spinner("Running checks..."):
             try:
-                result = analyze_note(image_path, denomination, tilt_path, backlit_path)
+                # import the analysis entrypoint lazily
+                try:
+                    from main import analyze_note
+                    _can_run = True
+                except Exception as ie:
+                    st.error(
+                        "Cannot run analysis: required native dependency missing (e.g. OpenCV). "
+                        "On Streamlit Cloud some binary wheels (opencv) may be unavailable. "
+                        "To continue, either deploy using a Python runtime that supports OpenCV or "
+                        "modify requirements / use a custom Docker image.\n\n"
+                        f"Import error: {ie}"
+                    )
+                    _can_run = False
+
+                if not _can_run:
+                    # Skip running the pipeline when imports failed.
+                    result = {"error": "analysis skipped due to missing native dependencies"}
+                else:
+                    result = analyze_note(image_path, denomination, tilt_path, backlit_path)
 
                 verdict = result["verdict"]
                 if verdict == "GENUINE":

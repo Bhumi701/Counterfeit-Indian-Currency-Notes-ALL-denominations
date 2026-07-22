@@ -43,3 +43,11 @@ tesseract --version
 
 If `tesseract --version` prints the version, restart your API server and retry the `/analyze` endpoint.
 
+## Streamlit Cloud deployment notes
+
+- Streamlit Cloud may use a newer Python runtime where some binary wheels (notably OpenCV) are not available. If your deployed app fails with "No module named 'cv2'", the app now shows a friendly error in the UI explaining this. Options to resolve:
+	1. Deploy using a Python runtime that matches the wheel availability (e.g., Python 3.11) if the platform allows choosing a runtime.
+	2. Supply a custom Docker image for deployment with OpenCV pre-installed.
+	3. Run the app locally (recommended for immediate demos) where you can control the Python version and install `opencv-python-headless`.
+
+
