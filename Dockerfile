@@ -13,10 +13,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
  && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-RUN python -m pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
-
+# Copy entire repo into the image first so files like requirements.txt are
+# available regardless of the builder's working-directory settings.
 COPY . .
+
+RUN python -m pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8501
 
