@@ -50,4 +50,16 @@ If `tesseract --version` prints the version, restart your API server and retry t
 	2. Supply a custom Docker image for deployment with OpenCV pre-installed.
 	3. Run the app locally (recommended for immediate demos) where you can control the Python version and install `opencv-python-headless`.
 
+### Quick: deploy with Docker (recommended for Streamlit-hosted or other container hosts)
+
+Build and run the included Docker image (this forces a compatible Python runtime and installs system libs for OpenCV/Tesseract):
+
+```bash
+docker build -t counterfeit-notes .
+docker run -p 8501:8501 counterfeit-notes
+```
+
+Then open http://localhost:8501 to use the app.
+
+
 
