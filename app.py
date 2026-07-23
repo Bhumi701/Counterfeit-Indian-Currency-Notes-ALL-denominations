@@ -50,7 +50,7 @@ if uploaded_file is not None:
     tilt_path = save_temp(tilt_file)
     backlit_path = save_temp(backlit_file)
 
-    st.image(uploaded_file, caption="Uploaded note", use_column_width=True)
+    st.image(uploaded_file, caption="Uploaded note", width=700)
 
     if st.button("Analyze Note", type="primary"):
         with st.spinner("Running checks..."):
